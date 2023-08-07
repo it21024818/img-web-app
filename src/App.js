@@ -27,6 +27,7 @@ function App() {
         image: base64Image,
         language: language,
       }).then(response => {
+        console.log(response);
         setAudioSrc(response.data.output);
         const audio = new Audio(audioSrc);
         audio.play();
