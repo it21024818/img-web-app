@@ -8,16 +8,20 @@ function App() {
   const [picture, setPicture] = useState("");
   const webcamRef = useRef(null);
   const [start, setStart] = useState(false);
-  const [outputString, setOutputString] = useState('testing');
+  const [outputString, setOutputString] = useState('');
 
-  const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.REACT_APP_SPEECH_KEY, process.env.REACT_APP_SPEECH_REGION);
+  const REACT_APP_SPEECH_KEY = '48a1f47bad034c669a041e7bad322388';
+  const REACT_APP_SPEECH_REGION = 'southeastasia';
+
+  //calling the Azure cognitive services using SDKs
+  const speechConfig = sdk.SpeechConfig.fromSubscription(REACT_APP_SPEECH_KEY, REACT_APP_SPEECH_REGION);
   const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
-  speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"; 
-  // speechConfig.speechSynthesisVoiceName = language; 
+  // speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"; 
+  speechConfig.speechSynthesisVoiceName = language; 
 
   useEffect(() => {
     if (start) {
-      playAudioFromAzure();
+      //setting 5 seconds interval to capture images 
       const capture = setInterval(() => {
         setPicture(webcamRef.current.getScreenshot());
       }, 5000);
@@ -28,11 +32,13 @@ function App() {
 
   useEffect(() => {
     if (picture) {
+      //sending the image to the server side and takng the response
       const base64Image = picture.split(',')[1];
 
       axios.post('http://localhost:8000/img/', {
         image: base64Image,
       }).then(response => {
+        //passing the reponse to the azure speech service calling function
         console.log(response);
         setOutputString(response.data.output);
         playAudioFromAzure();
@@ -50,10 +56,12 @@ function App() {
     setStart(false);
   };
 
+  //function declaration to send the text to azure speech service and play the voice
   const playAudioFromAzure = async () => {
     try {
       const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
-      synthesizer.speakTextAsync(outputString,
+      const output = JSON.stringify(outputString);
+      synthesizer.speakTextAsync(output,
           function (result) {
               if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
                   console.log("synthesis finished.");
@@ -85,7 +93,8 @@ function App() {
     },
     webcam: {
       border: '2px solid #333',
-      marginBottom: '1rem'
+      marginBottom: '1rem',
+      width: '40%'
     },
     select: {
       margin: '0.5rem',
