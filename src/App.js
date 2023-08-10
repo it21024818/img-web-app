@@ -16,6 +16,7 @@ function App() {
   const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.REACT_APP_SPEECH_KEY, process.env.REACT_APP_SPEECH_REGION);
   const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
   speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"; 
+  // speechConfig.speechSynthesisVoiceName = language; 
 
   useEffect(() => {
     if (start) {
@@ -118,8 +119,10 @@ function App() {
       <Webcam audio={false} screenshotFormat="image/jpeg" ref={webcamRef} style={styles.webcam} />
       <select value={language} onChange={(e) => setLanguage(e.target.value)} style={styles.select}>
         <option value="">Select a language</option>
-        <option value="en">English</option>
-        <option value="fr">French</option>
+        <option value="en-US-JennyNeural">English</option>
+        <option value="fr-FR-DeniseNeural">French</option>
+        <option value="es-ES-ElviraNeural">Spanish</option>
+        <option value="si-LK-ThiliniNeural">Sinhala</option>
         {/* Add more language options here */}
       </select>
       <button onClick={handleStart} style={styles.button}>Start</button>
