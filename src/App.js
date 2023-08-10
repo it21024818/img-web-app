@@ -1,20 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import Webcam from 'react-webcam';
+var sdk = require("microsoft-cognitiveservices-speech-sdk");
 
 function App() {
   const [language, setLanguage] = useState("");
   const [picture, setPicture] = useState("");
   const webcamRef = useRef(null);
   const [start, setStart] = useState(false);
-  const [outputString, setOutputString] = useState('');
+  const [outputString, setOutputString] = useState('testing');
 
-  const azureEndpoint = 'https://southeastasia.tts.speech.microsoft.com/cognitiveservices/v1';
-  const azureKey = '48a1f47bad034c669a041e7bad322388'; // this should be stored in a secure location
+  const REACT_APP_SPEECH_KEY = '48a1f47bad034c669a041e7bad322388';
+  const REACT_APP_SPEECH_REGION = 'southeastasia'; // this should be stored in a secure location
 
+  const speechConfig = sdk.SpeechConfig.fromSubscription(REACT_APP_SPEECH_KEY, REACT_APP_SPEECH_REGION);
+  const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
+  speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"; 
 
   useEffect(() => {
     if (start) {
+      playAudioFromAzure();
       const capture = setInterval(() => {
         setPicture(webcamRef.current.getScreenshot());
       }, 5000);
@@ -32,7 +37,7 @@ function App() {
       }).then(response => {
         console.log(response);
         setOutputString(response.data.output);
-        playAudioFromAzure(response.data.output);
+        playAudioFromAzure();
       }).catch(error => {
         console.log(error);
       });
@@ -49,21 +54,22 @@ function App() {
 
   const playAudioFromAzure = async () => {
     try {
-      const headers = {
-        'Authorization': `Bearer ${azureKey}`,
-        'Content-Type': 'application/ssml+xml',
-        'X-Microsoft-OutputFormat': 'riff-24khz-16bit-mono-pcm'
-      };
-      const body = `
-        <speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>
-          <voice name='en-US-JennyNeural'>
-            ${outputString}
-          </voice>
-        </speak>
-      `;
-      const response = await axios.post(azureEndpoint, body, { headers, responseType: 'blob' });
-      const audioUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'audio/wav' }));
-      new Audio(audioUrl).play();
+      const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+      synthesizer.speakTextAsync(outputString,
+          function (result) {
+              if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+                  console.log("synthesis finished.");
+              } else {
+                  console.error("Speech synthesis canceled, " + result.errorDetails +
+                  "\nDid you set the speech resource key and region values?");
+              }
+              synthesizer.close();
+          },
+          function (err) {
+              console.trace("err - " + err);
+              synthesizer.close();
+          }
+      );
     } catch (error) {
       console.error("Error synthesizing speech:", error);
     }
