@@ -10,9 +10,6 @@ function App() {
   const [start, setStart] = useState(false);
   const [outputString, setOutputString] = useState('testing');
 
-  // const REACT_APP_SPEECH_KEY = '48a1f47bad034c669a041e7bad322388';
-  // const REACT_APP_SPEECH_REGION = 'southeastasia'; // this should be stored in a secure location
-
   const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.REACT_APP_SPEECH_KEY, process.env.REACT_APP_SPEECH_REGION);
   const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
   speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"; 
