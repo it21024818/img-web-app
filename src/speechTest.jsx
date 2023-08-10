@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 var sdk = require("microsoft-cognitiveservices-speech-sdk");
 
 function SpeechSynthesis() {
-
-    const REACT_APP_SPEECH_KEY = '48a1f47bad034c669a041e7bad322388';
-    const REACT_APP_SPEECH_REGION = 'southeastasia';
     
     const [text, setText] = useState('');
     // const audioFile = "YourAudioFile.wav";
     // You'd ideally use .env files for React for storing environment variables.
-    const speechConfig = sdk.SpeechConfig.fromSubscription(REACT_APP_SPEECH_KEY, REACT_APP_SPEECH_REGION);
+    const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.REACT_APP_SPEECH_KEY, process.env.REACT_APP_SPEECH_REGION);
     const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
     speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural"; 
 
